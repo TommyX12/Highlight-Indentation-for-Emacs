@@ -106,6 +106,7 @@ Known issues:
 (defvar highlight-indentation-hidden-overlays nil)
 (defvar highlight-indentation--completing nil)
 (defvar highlight-indentation--idle-timer nil)
+(defvar highlight-indentation--defer-redraw nil)
 (defvar-local highlight-indentation--changes nil)
 (defvar-local highlight-indentation--prev-start nil)
 (defvar-local highlight-indentation--prev-end nil)
@@ -123,12 +124,12 @@ Known issues:
 
 (defconst highlight-indentation-hooks
   '((after-change-functions (lambda (start end length)
-                              (push `(,start . ,end) highlight-indentation--changes)
-                              ;; (highlight-indentation-redraw-region
-                              ;;  start end
-                              ;;  'highlight-indentation-overlay
-                              ;;  'highlight-indentation-put-overlays-region)
-                              )
+                              (if highlight-indentation--defer-redraw
+                                  (push `(,start . ,end) highlight-indentation--changes)
+                                (highlight-indentation-redraw-region
+                                 start end
+                                 'highlight-indentation-overlay
+                                 'highlight-indentation-put-overlays-region)))
                             t t)
     (window-scroll-functions (lambda (win start)
                                (highlight-indentation-redraw-window
