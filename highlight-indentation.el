@@ -89,6 +89,10 @@
   "Amount of time to wait before drawing indentation guides on changes."
   :group 'highlight-indentation)
 
+(defcustom highlight-indentation-fix-company t
+  "Whether to apply a temporary fix for company completion."
+  :group 'highlight-indentation)
+
 (defcustom highlight-indentation-blank-lines nil
   "Show indentation guides on blank lines.  Experimental.
 
@@ -445,7 +449,8 @@ from major mode"
 
 (defun highlight-indentation--completion-start (&rest _)
   "Ran when company completion start.  For fixing bug with company overlay."
-  (when highlight-indentation-blank-lines
+  (when (and highlight-indentation-fix-company
+             highlight-indentation-blank-lines)
     (setq highlight-indentation--completing t)
     (let ((start (point))
           (end (line-beginning-position 3)))
@@ -453,7 +458,8 @@ from major mode"
 
 (defun highlight-indentation--completion-end (&rest _)
   "Ran when company completion end.  For fixing bug with company overlay."
-  (when highlight-indentation-blank-lines
+  (when (and highlight-indentation-fix-company
+             highlight-indentation-blank-lines)
     (setq highlight-indentation--completing nil)
     (highlight-indentation-unhide-overlays)))
 
